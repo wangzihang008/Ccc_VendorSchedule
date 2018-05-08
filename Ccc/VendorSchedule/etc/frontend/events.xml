@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="insert_data">
+        <observer name="insert_data" instance="Ccc\VendorSchedule\Observer\insertData" />
+    </event>
+    <event name="check_login">
+        <observer name="check_login" instance="Ccc\VendorSchedule\Observer\CheckLoginPersistentObserver" />
+    </event>
+</config>

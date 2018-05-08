@@ -1,0 +1,211 @@
+<?php
+
+/**
+ * CedCommerce
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the End User License Agreement (EULA)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://cedcommerce.com/license-agreement.txt
+ *
+ * @category    Ced
+ * @package     Ced_CsMarketplace
+ * @author      CedCommerce Core Team <connect@cedcommerce.com>
+ * @copyright   Copyright CedCommerce (http://cedcommerce.com/)
+ * @license      http://cedcommerce.com/license-agreement.txt
+ */
+?>
+<?php 
+    $url = $this->getBackUrl();
+
+    $bookedCollection = $block->getCollection(); 
+    $VendorId = $block->getVendorId();
+?>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <i class="fa fa-shopping-cart fa-fw"></i>
+        <?php echo "Booked Appointment List"; ?>
+    </div>
+    <form id = "calendar_form" action = "<?php echo $url; ?>" method="post">
+    <div id="appointment_booked_list" style="min-height: 50px;max-height:200px;overflow:scroll;overflow-x:hidden;"></div>
+    </form>
+</div>
+<div id="test"></div>
+<script>
+    var booked_date_collection;
+    var booked_time_collection;
+    var booked_address_collection;
+    var booked_vendor_collection;
+    var booked_content_collection;
+    var booked_id_collection;
+    
+    function getBookedInfo(){
+        
+        booked_date_collection = new Array();
+        booked_time_collection = new Array();
+        booked_address_collection = new Array();
+        booked_vendor_collection = new Array();
+        booked_content_collection = new Array();
+        booked_id_collection = new Array();
+        
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth()+1;
+        var yyyy = today.getFullYear();
+        
+        <?php foreach($bookedCollection as $CollectionItem){?>
+                var x = "<?php echo $CollectionItem->getData('status'); ?>";
+                var vendorId = "<?php echo $CollectionItem->getData('vendor_id'); ?>";
+                if(x == "booked" && vendorId == "<?php echo $VendorId; ?>"){
+                    var date = "<?php echo $CollectionItem->getData("date");?>";
+                    var d = date.split("/");
+                    if(yyyy < d[2] || (yyyy == d[2] && mm < d[1]) || (yyyy == d[2] && mm == d[1] && dd <= d[0])){
+                        booked_id_collection.push("<?php echo $CollectionItem->getData("id");?>");
+                        booked_date_collection.push("<?php echo $CollectionItem->getData("date");?>");
+                        booked_time_collection.push("<?php echo $CollectionItem->getData("time");?>");
+                        booked_address_collection.push("<?php echo $CollectionItem->getData("address");?>");
+                        booked_vendor_collection.push("<?php echo $CollectionItem->getData("vendor_name");?>");
+                        booked_content_collection.push("<?php echo $CollectionItem->getData("content");?>");
+                    }
+                }
+        <?php } ?>
+    }
+    
+    function createBookedList(){
+        getBookedInfo();
+        var table = document.createElement("table");
+        table.id = "booked_appointment";
+        if(booked_date_collection != null){
+            var title_row = document.createElement("TR");
+            var title_id = document.createElement("TD");
+            title_id.innerHTML = "ID";
+            var title_date = document.createElement("TD");
+            title_date.innerHTML = "Date";
+            var title_time = document.createElement("TD");
+            title_time.innerHTML = "Time";
+            var title_customer = document.createElement("TD");
+            title_customer.innerHTML = "Customer Name";
+            var title_address = document.createElement("TD");
+            title_address.innerHTML = "Address";
+            title_row.appendChild(title_id);
+            title_row.appendChild(title_date);
+            title_row.appendChild(title_time);
+            title_row.appendChild(title_customer);
+            title_row.appendChild(title_address);
+            table.appendChild(title_row);
+            
+            
+            for(var i = 0; i < booked_date_collection.length; i++){
+                title_row = document.createElement("TR");
+                title_id = document.createElement("TD");
+                title_id.style.cssText = "width:100px;border: 0";
+                title_id.colSpan = 1;
+                var title_id_content = document.createElement("INPUT");
+                title_id_content.value = booked_id_collection[i];
+                title_id_content.readOnly = true;
+                title_id_content.name = "unread_appointment_id";
+                title_id_content.style.cssText = "width:100px;border: 0";
+                title_id.appendChild(title_id_content);
+                
+                title_date = document.createElement("TD");
+                title_date.innerHTML = booked_date_collection[i];
+                title_date.style.cssText = "width:100px;";
+                title_time = document.createElement("TD");
+                title_time.innerHTML = booked_time_collection[i];
+                title_time.style.cssText = "width:100px;";
+                title_customer = document.createElement("TD");
+                title_customer.innerHTML = booked_vendor_collection[i];
+                title_customer.style.cssText = "width:200px;";
+                title_address = document.createElement("TD");
+                title_address.innerHTML = booked_address_collection[i];
+                title_address.style.cssText = "width:300px;";
+                var button_cell = document.createElement("TD");
+                var b = document.createElement("button");
+                b.className = "detail_button_group";
+                b.id = i;
+                b.type = "button";
+                b.innerHTML = "Detail";
+                button_cell.appendChild(b);
+                title_row.appendChild(title_id);
+                title_row.appendChild(title_date);
+                title_row.appendChild(title_time);
+                title_row.appendChild(title_customer);
+                title_row.appendChild(title_address);
+                title_row.appendChild(button_cell);
+                table.appendChild(title_row);
+                var detail_row = document.createElement("TR");
+                var detail_row_cell = document.createElement("TD");
+                detail_row_cell.colSpan = 5;
+                detail_row_cell.className = "booked_appointment_detail";
+                detail_row.appendChild(detail_row_cell);
+                table.append(detail_row);
+                b.onclick = function(){
+                    setBookedDetailContentButton(this.id);
+                };
+            }
+        }
+        document.getElementById("appointment_booked_list").appendChild(table);
+        var rows = document.getElementById("booked_appointment").getElementsByTagName("TR").length;
+        if(rows <= 1){
+            document.getElementById("booked_appointment").innerHTML = "";
+            var table_title = document.createElement("TH");
+            table_title.innerHTML = "No Booked Appointment";
+            table.appendChild(table_title);
+        }
+    }
+    
+    function setBookedDetailContentButton(id){
+        getBookedInfo();
+        var content_area = document.createElement("textarea");
+        content_area.innerHTML = booked_content_collection[id].replace(/<br\s*\/?>/mg, "\n");
+        content_area.readOnly = true;
+        content_area.style.cssText = "width:800px;height:100px;";
+        var finish_button = document.createElement("INPUT");
+        finish_button.type = "submit";
+        finish_button.name = "booked_finish";
+        finish_button.value = "Finish";
+        var close_button = document.createElement("INPUT");
+        close_button.type = "button";
+        close_button.value = "Close";
+        var booked_appointment_detail = new Array();
+        booked_appointment_detail = document.getElementsByClassName("booked_appointment_detail");
+        
+        for(var i = 0; i < booked_appointment_detail.length; i++){
+            if(id == i){
+                if(booked_appointment_detail[id].innerHTML == ""){
+                    booked_appointment_detail[id].appendChild(content_area);
+                    booked_appointment_detail[id].appendChild(finish_button);
+                    booked_appointment_detail[id].appendChild(close_button);
+                    close_button.onclick = function(){
+                        booked_appointment_detail[id].innerHTML = "";
+                    };
+                }else{
+                    booked_appointment_detail[id].innerHTML = "";
+                }
+            }
+        }
+    }
+    
+    createBookedList();
+    //createDetails();
+</script>
+
+<style>
+	.ced_order_info::before {
+	  content: none !important;
+	}								
+</style>
+<script type="text/javascript">
+require([
+		'jquery'
+		], function($){ 
+	$(document).ready(function($) {
+		$(".clickable-row").click(function() {
+	        window.document.location = $(this).data("href");
+	    });
+	});
+});
+</script>

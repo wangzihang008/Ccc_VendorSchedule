@@ -1,0 +1,375 @@
+<?php
+
+/**
+ * CedCommerce
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the End User License Agreement (EULA)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://cedcommerce.com/license-agreement.txt
+ *
+ * @category    Ced
+ * @package     Ced_CsMarketplace
+ * @author      CedCommerce Core Team <connect@cedcommerce.com>
+ * @copyright   Copyright CedCommerce (http://cedcommerce.com/)
+ * @license      http://cedcommerce.com/license-agreement.txt
+ */
+?>
+<?php 
+    $unreadCollection = $block->getCollection(); 
+    $url = $this->getBackUrl();
+    
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $customerSession = $objectManager->get('Magento\Customer\Model\Session');
+    $login = $customerSession->isLoggedIn();
+    if($login){
+        $customerId = $customerSession->getCustomer()->getId();
+        $customerName = $customerSession->getCustomer()->getName();
+    }else{
+        $customerId = "";
+        $customerName = "";
+    }
+    
+?>
+<div id="test"></div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <i class="fa fa-shopping-cart fa-fw"></i>
+        <?php echo "Unread Message List"; ?>
+    </div>
+    <form id = "calendar_form" action = "<?php echo $url; ?>" method="post">
+    <div id="appointment_unread_list" style="min-height: 50px;max-height:200px;overflow:scroll;overflow-x:hidden;"></div>
+    
+<script>
+    var unread_date_collection;
+    var unread_time_collection;
+    var unread_address_collection;
+    var unread_customer_collection;
+    var unread_content_collection;
+    var unread_id_collection;
+    
+    function getUnreadInfo(){
+        
+        unread_date_collection = new Array();
+        unread_time_collection = new Array();
+        unread_address_collection = new Array();
+        unread_vendor_collection = new Array();
+        unread_content_collection = new Array();
+        unread_id_collection = new Array();
+        
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth()+1;
+        var yyyy = today.getFullYear();
+        
+        <?php foreach($unreadCollection as $CollectionItem){?>
+                var x = "<?php echo $CollectionItem->getData('status'); ?>";
+                var customerId = "<?php echo $CollectionItem->getData('customer_id'); ?>";
+                if(x == "customer unread" && customerId == "<?php echo $customerId;?>"){
+                    var date = "<?php echo $CollectionItem->getData("date");?>";
+                    var d = date.split("/");
+                    if(yyyy < d[2] || (yyyy == d[2] && mm < d[1]) || (yyyy == d[2] && mm == d[1] && dd <= d[0])){
+                        unread_id_collection.push("<?php echo $CollectionItem->getData("id");?>");
+                        unread_date_collection.push("<?php echo $CollectionItem->getData("date");?>");
+                        unread_time_collection.push("<?php echo $CollectionItem->getData("time");?>");
+                        unread_address_collection.push("<?php echo $CollectionItem->getData("address");?>");
+                        unread_vendor_collection.push("<?php echo $CollectionItem->getData("vendor_name");?>");
+                        unread_content_collection.push("<?php echo $CollectionItem->getData("content");?>".replace(/<br\s*\/?>/mg, "\n"));
+                    }
+                }
+        <?php } ?>
+    }
+    
+    function createUnreadList(){
+        getUnreadInfo();
+        
+        var table = document.createElement("table");
+        table.id = "unread_appointment";
+        if(unread_date_collection != null){
+            var title_row = document.createElement("TR");
+            var title_id = document.createElement("TD");
+            title_id.innerHTML = "Appointment ID";
+            var title_date = document.createElement("TD");
+            title_date.innerHTML = "Date";
+            var title_time = document.createElement("TD");
+            title_time.innerHTML = "Time";
+            var title_customer = document.createElement("TD");
+            title_customer.innerHTML = "Vendor Name";
+            var title_address = document.createElement("TD");
+            title_address.innerHTML = "Address";
+            title_row.appendChild(title_id);
+            title_row.appendChild(title_date);
+            title_row.appendChild(title_time);
+            title_row.appendChild(title_customer);
+            title_row.appendChild(title_address);
+            table.appendChild(title_row);
+            
+            for(var i = 0; i < unread_date_collection.length; i++){
+                title_row = document.createElement("TR");
+                title_row.className = "unread_appointment_row";
+                
+                title_id = document.createElement("TD");
+                title_id.style.cssText = "width:100px;border: 0;";
+                title_id.colSpan = 1;
+                var title_id_content = document.createElement("INPUT");
+                title_id_content.value = unread_id_collection[i];
+                title_id_content.readOnly = true;
+                title_id_content.id = "unread_appointment_" + i;
+                title_id_content.style.cssText = "width:100px;border: 0;";
+                title_id.appendChild(title_id_content);
+                
+                title_date = document.createElement("TD");
+                title_date.style.cssText = "width:100px;";
+                title_date.colSpan = 1;
+                var title_date_content = document.createElement("INPUT");
+                title_date_content.value = unread_date_collection[i];
+                title_date_content.style.cssText = "width:100px;border:0;";
+                title_date_content.readOnly = true;
+                //title_date_content.name = "unread_date";
+                title_date_content.className = "appointment_date";
+                title_date_content.id  = "unread_date_" + i;
+                title_date.appendChild(title_date_content);
+                
+                title_time = document.createElement("TD");
+                title_time.colSpan = 1;
+                title_time.style.cssText = "width:100px;";
+                var title_time_content = document.createElement("INPUT");
+                //title_time_content.name = "unread_time";
+                title_time_content.value = unread_time_collection[i];
+                title_time_content.readOnly = true;
+                title_time_content.style.cssText = "width:100px;";
+                //title_time_content.appendChild(createTimeList(unread_time_collection[i]));
+                var title_time_content_1 = createTimeList(unread_time_collection[i]);
+                title_time_content_1.disabled = true;
+                title_time_content_1.id = "unread_time_" + i;
+                title_time.appendChild(title_time_content_1);
+                
+                title_customer = document.createElement("TD");
+                title_customer.colSpan = 1;
+                title_customer.style.cssText = "width:150px;border: 0;";
+                var title_customer_content = document.createElement("INPUT");
+                title_customer_content.value = unread_vendor_collection[i];
+                title_customer_content.readOnly = true;
+                title_customer_content.style.cssText = "width:150px;border: 0;";
+                title_customer.appendChild(title_customer_content);
+                
+                title_address = document.createElement("TD");
+                title_address.colSpan = 1;
+                title_address.style.cssText = "width:250px;";
+                var title_address_content = document.createElement("INPUT");
+                title_address_content.value = unread_address_collection[i];
+                title_address_content.readOnly = true;
+                title_address_content.style.cssText = "width:250px;";
+                title_address_content.id = "unread_address_" + i;
+                title_address.appendChild(title_address_content);
+                
+                var button_cell = document.createElement("TD");
+                var b = document.createElement("button");
+                b.id = i;
+                b.type = "button";
+                b.innerHTML = "Detail";
+                
+                button_cell.appendChild(b);
+                title_row.appendChild(title_id);
+                title_row.appendChild(title_date);
+                title_row.appendChild(title_time);
+                title_row.appendChild(title_customer);
+                title_row.appendChild(title_address);
+                title_row.appendChild(button_cell);
+                table.appendChild(title_row);
+                
+                b.onclick = function(){
+                    if(document.getElementById("unread_reply_row") == null){
+                        setAbility(this.id, false);
+                        setUnreadDetailContentButton(this.id);
+                    }else{
+                        table.removeChild(document.getElementById("unread_reply_row"));
+                        table.removeChild(document.getElementById("unread_reply_button_row"));
+                        setAbility(this.id, true);
+                    }
+                };
+            }
+        }
+        document.getElementById("appointment_unread_list").appendChild(table);
+        var rows = document.getElementById("unread_appointment").getElementsByTagName("TR").length;
+        if(rows <= 1){
+            document.getElementById("unread_appointment").innerHTML = "";
+            var table_title = document.createElement("TH");
+            table_title.innerHTML = "No Booked Appointment";
+            table.appendChild(table_title);
+        }
+    }
+    
+    function setAbility(i, able){
+        document.getElementById("unread_address_" + i).readOnly = able;
+        document.getElementById("unread_date_" + i).readOnly = able;
+        document.getElementById("unread_time_" + i).disabled = able;
+        if(!able){
+            document.getElementById("unread_appointment_" + i).name = "unread_appointment_id";
+            document.getElementById("unread_address_" + i).name = "unread_address";
+            document.getElementById("unread_date_" + i).name = "unread_date";
+            document.getElementById("unread_time_" + i).name = "unread_time";
+        }else{
+            document.getElementById("unread_appointment_" + i).removeAttribute("name");
+            document.getElementById("unread_address_" + i).removeAttribute("name");
+            document.getElementById("unread_date_" + i).removeAttribute("name");
+            document.getElementById("unread_time_" + i).removeAttribute("name");
+        }
+    }
+    
+    function createTimeList(id){
+        var timeList = document.createElement("select");
+        timeList.style.cssText = "height:25px;";
+        for(var i = 8; i <= 20; i++){
+            var e = document.createElement("option");
+            e.name = "unread_time";
+            e.value = i + ":00";
+            e.innerHTML = i + ":00";
+            e.style.cssText = "height:25px;";
+            if(i + ":00"== id){
+                e.selected = true;
+            }
+            timeList.appendChild(e);
+        }
+        timeList.disable= "disable";
+        return timeList;
+    }
+    
+    function setUnreadDetailContentButton(id){
+        getUnreadInfo();
+
+        var content_eara_cell = document.createElement("TD");
+        var content_area = document.createElement("textarea");
+        content_area.innerHTML = unread_content_collection[id];
+        content_area.readOnly = true;
+        content_area.style.cssText = "width:700px;height:100px;";
+        content_eara_cell.colSpan = 5;
+        content_eara_cell.appendChild(content_area);
+        var reply_button = document.createElement("INPUT");
+        var cancel_button = document.createElement("INPUT");
+        var close_button = document.createElement("INPUT");
+        var edit_button = document.createElement("INPUT");
+        edit_button.value = "Edit";
+        edit_button.type = "submit";
+        edit_button.name = "unread_edit";
+
+        close_button.value = "Close";
+        close_button.type = "button";
+
+        reply_button.value = "Reply";
+        reply_button.type = "submit";
+        reply_button.id = id;
+        reply_button.onclick = function(){
+            createReplyContent(this.id);
+        };
+        cancel_button.value = "Cancel";
+        cancel_button.type = "submit";
+        cancel_button.name = "unread_cancel";
+
+        var edit_button_cell = document.createElement("TD");
+        edit_button_cell.appendChild(edit_button);
+        var reply_button_cell = document.createElement("TD");
+        reply_button_cell.appendChild(reply_button);
+        var cancel_button_cell = document.createElement("TD");
+        cancel_button_cell.appendChild(cancel_button);
+        var close_button_cell = document.createElement("TD");
+        close_button_cell.appendChild(close_button);
+
+        var table = document.getElementById("unread_appointment");
+        var row = parseInt(id);
+        var nextRow = row + 1;
+        var reply_row = table.insertRow(nextRow + 1);
+        var reply_button_row = table.insertRow(nextRow + 2);
+        reply_button_row.id = "unread_reply_button_row";
+        reply_row.id = "unread_reply_row";
+        reply_row.appendChild(content_eara_cell);
+        reply_button_row.appendChild(edit_button_cell);
+        reply_button_row.appendChild(reply_button_cell);
+        reply_button_row.appendChild(cancel_button_cell);
+        reply_button_row.appendChild(close_button_cell);
+        close_button.onclick = function(){
+            table.removeChild(document.getElementById("unread_reply_row"));
+            table.removeChild(document.getElementById("unread_reply_button_row"));
+            document.getElementById("unread_address_" + id).readOnly = true;
+            document.getElementById("unread_date_" + id).readOnly = true;
+            document.getElementById("unread_time_" + id).disabled = true;
+            document.getElementById("unread_address_" + id).removeAttribute("name");
+            document.getElementById("unread_date_" + id).removeAttribute("name");
+            document.getElementById("unread_time_" + id).removeAttribute("name");
+        };
+    }
+    
+    function createReplyContent(id){
+        var table = document.getElementById("unread_appointment");
+        table.removeChild(document.getElementById("unread_reply_row"));
+        table.removeChild(document.getElementById("unread_reply_button_row"));
+        
+        var content_area_title = document.createElement("TR");
+        content_area_title.innerHTML = "New Message";
+        content_area_title.id = "unread_appointment_reply_message";
+        var content_area_cell = document.createElement("TD");
+        content_area_cell.colSpan = 5;
+        var content_area = document.createElement("textarea");
+        content_area.style.cssText = "width:700px;height:100px;";
+        content_area.name = "unread_new_message";
+        content_area_cell.appendChild(content_area);
+        
+        var close_button_cell = document.createElement("TD");
+        var close_button = document.createElement("INPUT");
+        close_button.type = "button";
+        close_button.value = "Colse";
+        close_button_cell.appendChild(close_button);
+        var send_button_cell = document.createElement("TD");
+        var send_button = document.createElement("INPUT");
+        send_button.type = "submit";
+        send_button.name = "unread_add";
+        send_button.value = "Send";
+        send_button_cell.appendChild(send_button);
+        
+        var nextRow = parseInt(id) + 1;
+        var reply_row = table.insertRow(nextRow + 1);
+        var reply_button_row = table.insertRow(nextRow + 2);
+        reply_button_row.id = "unread_reply_button_row";
+        reply_row.id = "unread_reply_row";
+        reply_row.appendChild(content_area_cell);
+        reply_button_row.appendChild(send_button_cell);
+        reply_button_row.appendChild(close_button_cell);
+        
+    }
+    
+    createUnreadList();
+        </script>
+    </form>
+</div>
+
+<style>
+	.ced_order_info::before {
+	  content: none !important;
+	}								
+</style>
+<script type="text/javascript">
+require([
+		'jquery'
+		], function($){ 
+	$(document).ready(function($) {
+		$(".clickable-row").click(function() {
+	        window.document.location = $(this).data("href");
+	    });
+	});
+});
+require([
+          "jquery",
+          "mage/calendar"
+     ], function($){
+         $(document).ready(function($){
+             $(".appointment_date").calendar({
+                dateFormat: "dd/mm/yyyy",
+                minDate: 0
+            });
+         });
+       });
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAo4noW3hBUU9r9f1sF2_NZ5KB9tUwNiIQ&libraries=places&callback=initAutocomplete"
+        async defer></script>

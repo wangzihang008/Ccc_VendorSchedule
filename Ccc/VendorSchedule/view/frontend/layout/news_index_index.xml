@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <!--<css src="Ccc_VendorSchedule::js/schedule.js"/>-->
+    </head>
+    <referenceContainer name="content">
+        <block class="Ccc\VendorSchedule\Block\Post" name="helloworld_display" template="Ccc_VendorSchedule::result.phtml" />
+    </referenceContainer>
+</page>

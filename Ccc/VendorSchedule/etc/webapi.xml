@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route method="GET" url="/V1/ccc-vendorschedule/post">
+        <service class="Ccc\VendorSchedule\Api\PostInterface" method="getCollection"/>
+        <resources>
+                <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route method="GET" url="/V1/ccc-vendorschedule/get-vendor-collection/:vendorId">
+        <service class="Ccc\VendorSchedule\Api\PostInterface" method="getVendorCollection"/>
+        <resources>
+                <resource ref="anonymous"/>
+        </resources>
+        <!--<data>
+            <parameter name="vendorId" force="true">%vendorId%</parameter>
+        </data>-->
+    </route>
+</routes>

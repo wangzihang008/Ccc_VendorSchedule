@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+    <update handle="customer_account"/>
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Customer Appointment Tickets</title>
+    </head>
+    <body>
+        <referenceBlock name="page.main.title">
+            <action method="setPageTitle">
+                <argument translate="true" name="title" xsi:type="string">Appointment Ticket</argument>
+            </action>
+         </referenceBlock>
+         <referenceContainer name="content">
+            <block class="Ccc\VendorSchedule\Block\Post" name="csmarketplace_customer_dashboard_schedule_unread_list" as="unread_list" template="Ccc_VendorSchedule::customer/unread_appointment_message.phtml"  cacheable="false"/>
+            <block class="Ccc\VendorSchedule\Block\Post" name="csmarketplace_customer_dashboard_schedule_booked_list" as="booked_list" template="Ccc_VendorSchedule::customer/booked_appointment.phtml"  cacheable="false"/>
+            <block class="Magento\Framework\View\Element\Template" name="csmarketplace_customer_dashboard_schedule" template="Ccc_VendorSchedule::customer.phtml" cacheable="false"/>
+            <!--<block class="Ccc\VendorSchedule\Block\Post" name="customer_appointment_ticket" template="Ccc_VendorSchedule::customer.phtml" />-->
+        </referenceContainer>
+    </body>
+</page>
